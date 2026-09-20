@@ -206,7 +206,7 @@ export class HacsDashboard extends LitElement {
           }}
         >
           <ha-svg-icon .path=${mdiFormatListBulleted} slot="start"></ha-svg-icon>
-          <div slot="headline">Lists</div>
+          <div slot="headline">${this.hacs.localize("menu.lists")}</div>
         </ha-md-menu-item>
 
         <ha-md-menu-item
@@ -287,11 +287,6 @@ export class HacsDashboard extends LitElement {
         </ha-md-menu-item>
       </ha-menu>`;
   };
-
-  private _activeListId(): string | undefined {
-    const listFilter = this._activeFilters?.find((filter) => filter.startsWith("list_"));
-    return listFilter?.substring("list_".length);
-  }
 
   private _filterRepositories = memoize(
     (
@@ -615,7 +610,7 @@ export class HacsDashboard extends LitElement {
 
   private _computeFilterFormLabel = (schema, _) =>
     schema.name === "list"
-      ? "List"
+      ? this.hacs.localize("menu.lists")
       : this.hacs.localize(
       // @ts-ignore
       `dialog_overview.${schema.name}`,
