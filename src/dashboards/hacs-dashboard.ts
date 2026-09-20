@@ -114,6 +114,7 @@ export class HacsDashboard extends LitElement {
   protected render = (): TemplateResult | void => {
     const repositories = this._filterRepositories(
       this.hacs.repositories,
+      this.hacs.lists,
       this.hacs.localize,
       this._activeFilters,
     );
@@ -163,8 +164,13 @@ export class HacsDashboard extends LitElement {
           .data=${{
             status: this._activeFilters?.find((filter) => filter.startsWith("status_")) || "",
             type: this._activeFilters?.find((filter) => filter.startsWith("type_")) || "",
+            list: this._activeFilters?.find((filter) => filter.startsWith("list_")) || "",
           }}
-          .schema=${this._filterSchema(this.hacs.localize, this.hacs.info.categories)}
+          .schema=${this._filterSchema(
+            this.hacs.localize,
+            this.hacs.info.categories,
+            this.hacs.lists,
+          )}
           .computeLabel=${this._computeFilterFormLabel}
           @value-changed=${this._handleFilterChanged}
         ></ha-form>
@@ -282,9 +288,15 @@ export class HacsDashboard extends LitElement {
       </ha-menu>`;
   };
 
+  private _activeListId(): string | undefined {
+    const listFilter = this._activeFilters?.find((filter) => filter.startsWith("list_"));
+    return listFilter?.substring("list_".length);
+  }
+
   private _filterRepositories = memoize(
     (
       repositories: RepositoryBase[],
+      lists: Hacs["lists"],
       localizeFunc: LocalizeFunc<HacsLocalizeKeys>,
       activeFilters?: string[],
     ): DataTableRowData[] =>
@@ -302,6 +314,28 @@ export class HacsDashboard extends LitElement {
             !activeFilters.includes(`type_${repository.category}`)
           ) {
             return false;
+          }
+
+          const activeListFilter = activeFilters?.find((filter) =>
+            filter.startsWith("list_"),
+          );
+
+          if (activeListFilter) {
+            const listId = activeListFilter.substring("list_".length);
+            const list = lists?.find((candidate) => candidate.id === listId);
+
+            if (!list) {
+              return false;
+            }
+
+            if (
+              !list.repositories.some(
+                (savedRepository) =>
+                  String(savedRepository.id) === String(repository.id),
+              )
+            ) {
+              return false;
+            }
           }
 
           return true;
@@ -509,7 +543,11 @@ export class HacsDashboard extends LitElement {
   );
 
   private _filterSchema = memoize(
-    (localizeFunc: LocalizeFunc<HacsLocalizeKeys>, types: string[]) =>
+    (
+      localizeFunc: LocalizeFunc<HacsLocalizeKeys>,
+      types: string[],
+      lists: Hacs["lists"],
+    ) =>
       [
         {
           name: "filters",
@@ -545,7 +583,20 @@ export class HacsDashboard extends LitElement {
             },
           },
         },
-      ] as const satisfies readonly HaFormSchema[],
+        {
+          name: "list",
+          selector: {
+            select: {
+              options: (lists || []).map((list) => ({
+                label: list.builtin ? `⭐ ${list.name}` : list.name,
+                value: `list_${list.id}`,
+              })),
+              mode: "dropdown",
+              sort: false,
+            },
+          },
+        },
+      ] as const satisfies readonly HaFormSchema[]
   );
 
   get _scrollerTarget() {
@@ -563,7 +614,9 @@ export class HacsDashboard extends LitElement {
   }
 
   private _computeFilterFormLabel = (schema, _) =>
-    this.hacs.localize(
+    schema.name === "list"
+      ? "List"
+      : this.hacs.localize(
       // @ts-ignore
       `dialog_overview.${schema.name}`,
     ) ||
@@ -583,7 +636,7 @@ export class HacsDashboard extends LitElement {
     const updatedFilters: string[] = Object.entries<any>(data)
       .filter(
         ([key, value]) =>
-          ["status", "type"].includes(key) && ![undefined, null, ""].includes(value),
+          ["status", "type", "list"].includes(key) && ![undefined, null, ""].includes(value),
       )
       .map(([_, value]) => value);
     this._activeFilters = updatedFilters.length ? updatedFilters : undefined;
