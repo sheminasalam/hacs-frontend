@@ -31,9 +31,15 @@ export interface HacsDownloadDialogParams extends BaseHacsDialogParams {
 
 export interface HacsCustomRepositoriesDialogParams extends BaseHacsDialogParams {}
 
+export interface HacsListsDialogParams extends BaseHacsDialogParams {}
+
+export interface HacsRepositoryListsDialogParams extends BaseHacsDialogParams {
+  repositoryId: string;
+}
+
 export const showHacsFormDialog = (
   element: HTMLElement,
-  dialogParams: HacsFormDialogParams
+  dialogParams: HacsFormDialogParams,
 ): void => {
   fireEvent(element, "show-dialog", {
     dialogTag: "hacs-form-dialog",
@@ -44,7 +50,7 @@ export const showHacsFormDialog = (
 
 export const showHacsDownloadDialog = (
   element: HTMLElement,
-  dialogParams: HacsDownloadDialogParams
+  dialogParams: HacsDownloadDialogParams,
 ): void => {
   fireEvent(element, "show-dialog", {
     dialogTag: "hacs-download-dialog",
@@ -55,11 +61,33 @@ export const showHacsDownloadDialog = (
 
 export const showHacsCustomRepositoriesDialog = (
   element: HTMLElement,
-  dialogParams: HacsCustomRepositoriesDialogParams
+  dialogParams: HacsCustomRepositoriesDialogParams,
 ): void => {
   fireEvent(element, "show-dialog", {
     dialogTag: "hacs-custom-repositories-dialog",
     dialogImport: () => import("./hacs-custom-repositories-dialog"),
+    dialogParams,
+  });
+};
+
+export const showHacsListsDialog = (
+  element: HTMLElement,
+  dialogParams: HacsListsDialogParams,
+): void => {
+  fireEvent(element, "show-dialog", {
+    dialogTag: "hacs-lists-dialog",
+    dialogImport: () => import("./hacs-lists-dialog"),
+    dialogParams,
+  });
+};
+
+export const showHacsRepositoryListsDialog = (
+  element: HTMLElement,
+  dialogParams: HacsRepositoryListsDialogParams,
+): void => {
+  fireEvent(element, "show-dialog", {
+    dialogTag: "hacs-repository-lists-dialog",
+    dialogImport: () => import("./hacs-repository-lists-dialog"),
     dialogParams,
   });
 };
