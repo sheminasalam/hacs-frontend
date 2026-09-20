@@ -5,6 +5,7 @@ import {
   mdiAlertCircleOutline,
   mdiDotsVertical,
   mdiFileDocument,
+  mdiFormatListBulleted,
   mdiGit,
   mdiGithub,
   mdiInformation,
@@ -24,14 +25,12 @@ import type {
   SortingDirection,
 } from "../../homeassistant-frontend/src/components/data-table/ha-data-table";
 import "../../homeassistant-frontend/src/layouts/hass-tabs-subpage-data-table";
-
 import "../../homeassistant-frontend/src/components/ha-button-menu";
 import "../../homeassistant-frontend/src/components/ha-fab";
 import "../../homeassistant-frontend/src/components/ha-form/ha-form";
 import "../../homeassistant-frontend/src/components/ha-markdown";
 import "../../homeassistant-frontend/src/components/ha-menu";
 import "../../homeassistant-frontend/src/components/ha-md-menu-item";
-
 import { LocalizeFunc } from "../../homeassistant-frontend/src/common/translations/localize";
 import { HaFormSchema } from "../../homeassistant-frontend/src/components/ha-form/types";
 import { HaMenu } from "../../homeassistant-frontend/src/components/ha-menu";
@@ -43,6 +42,7 @@ import { brandsUrl } from "../../homeassistant-frontend/src/util/brands-url";
 import {
   showHacsCustomRepositoriesDialog,
   showHacsFormDialog,
+  showHacsListsDialog,
 } from "../components/dialogs/show-hacs-dialog";
 import { repositoryMenuItems } from "../components/hacs-repository-owerflow-menu";
 import { aboutHacsmarkdownContent } from "../data/about";
@@ -76,7 +76,6 @@ export class HacsDashboard extends LitElement {
   @property({ attribute: false }) public hacs!: Hacs;
 
   @property({ attribute: false }) public hass!: HomeAssistant;
-
   @property({ attribute: false }) public route!: Route;
 
   @property({ type: Boolean, reflect: true })
@@ -89,7 +88,6 @@ export class HacsDashboard extends LitElement {
 
   @storage({ key: "hacs-dashboard-table-sorting", state: false, subscribe: false })
   private _activeSorting?: { column: string; direction: SortingDirection };
-
   @storage({ key: "hacs-dashboard-table-grouping", state: true, subscribe: false })
   private _activeGrouping?: string;
 
@@ -101,7 +99,6 @@ export class HacsDashboard extends LitElement {
 
   @storage({ key: "hacs-dashboard-table-hidden-columns", state: true, subscribe: false })
   private _hiddenTableColumns?: string[];
-
   @storage({ key: "hacs-dashboard-table-columns-ordering", state: true, subscribe: false })
   private _orderTableColumns?: string[];
 
@@ -172,6 +169,7 @@ export class HacsDashboard extends LitElement {
           @value-changed=${this._handleFilterChanged}
         ></ha-form>
       </hass-tabs-subpage-data-table>
+
       <ha-menu id="repository-overflow-menu" positioning="fixed">
         ${this._overflowMenuRepository
           ? repositoryMenuItems(this, this._overflowMenuRepository, this.hacs.localize).map(
@@ -192,7 +190,19 @@ export class HacsDashboard extends LitElement {
             )
           : nothing}
       </ha-menu>
+
       <ha-menu id="overflow-menu" positioning="fixed">
+        <ha-md-menu-item
+          .clickAction=${() => {
+            showHacsListsDialog(this, {
+              hacs: this.hacs,
+            });
+          }}
+        >
+          <ha-svg-icon .path=${mdiFormatListBulleted} slot="start"></ha-svg-icon>
+          <div slot="headline">Lists</div>
+        </ha-md-menu-item>
+
         <ha-md-menu-item
           .clickAction=${() => {
             mainWindow.open(documentationUrl({}), "_blank", "noreferrer=true");
@@ -201,6 +211,7 @@ export class HacsDashboard extends LitElement {
           <ha-svg-icon .path=${mdiFileDocument} slot="start"></ha-svg-icon>
           <div slot="headline">${this.hacs.localize("menu.documentation")}</div>
         </ha-md-menu-item>
+
         <ha-md-menu-item
           .clickAction=${() => {
             mainWindow.open("https://github.com/hacs", "_blank", "noreferrer=true");
@@ -209,6 +220,7 @@ export class HacsDashboard extends LitElement {
           <ha-svg-icon .path=${mdiGithub} slot="start"></ha-svg-icon>
           <div slot="headline">GitHub</div>
         </ha-md-menu-item>
+
         <ha-md-menu-item
           .clickAction=${() => {
             mainWindow.open(
@@ -223,6 +235,7 @@ export class HacsDashboard extends LitElement {
           <ha-svg-icon .path=${mdiAlertCircleOutline} slot="start"></ha-svg-icon>
           <div slot="headline">${this.hacs.localize("menu.open_issue")}</div>
         </ha-md-menu-item>
+
         <ha-md-menu-item
           .clickAction=${() => {
             if (!this.hacs.info.disabled_reason) {
@@ -240,6 +253,7 @@ export class HacsDashboard extends LitElement {
           <ha-svg-icon .path=${mdiGit} slot="start"></ha-svg-icon>
           <div slot="headline">${this.hacs.localize("menu.custom_repositories")}</div>
         </ha-md-menu-item>
+
         ${repositoriesContainsNew
           ? html`<ha-md-menu-item
               .clickAction=${() => {
@@ -250,6 +264,7 @@ export class HacsDashboard extends LitElement {
               <div slot="headline">${this.hacs.localize("menu.dismiss")}</div>
             </ha-md-menu-item>`
           : nothing}
+
         <ha-md-menu-item
           .clickAction=${() => {
             showHacsFormDialog(this, {
@@ -281,24 +296,29 @@ export class HacsDashboard extends LitElement {
           ) {
             return false;
           }
+
           if (
             activeFilters?.filter((filter) => filter.startsWith("type_")).length &&
             !activeFilters.includes(`type_${repository.category}`)
           ) {
             return false;
           }
+
           return true;
         })
         .sort((a, b) => {
           if (a.installed !== b.installed) {
             return a.installed ? -1 : 1;
           }
+
           if (a.new !== b.new) {
             return a.new ? -1 : 1;
           }
+
           if (a.stars !== b.stars) {
             return a.stars > b.stars ? -1 : 1;
           }
+
           return a.name.localeCompare(b.name);
         })
         .map((repository) => ({
@@ -344,6 +364,7 @@ export class HacsDashboard extends LitElement {
                 ></ha-svg-icon>
               `,
       },
+
       name: {
         ...defaultKeyData,
         title: localizeFunc("column.name"),
@@ -354,6 +375,7 @@ export class HacsDashboard extends LitElement {
         extraTemplate: (repository: RepositoryBase) =>
           !narrow ? html`<div class="secondary">${repository.description}</div>` : nothing,
       },
+
       downloads: {
         ...defaultKeyData,
         title: localizeFunc("column.downloads"),
@@ -361,12 +383,14 @@ export class HacsDashboard extends LitElement {
         hidden: false,
         template: (repository: RepositoryBase) => html`${repository.downloads || "-"}`,
       },
+
       stars: {
         ...defaultKeyData,
         title: localizeFunc("column.stars"),
         sortable: true,
         hidden: false,
       },
+
       last_updated: {
         ...defaultKeyData,
         title: localizeFunc("column.last_updated"),
@@ -376,6 +400,7 @@ export class HacsDashboard extends LitElement {
           if (!repository.last_updated) {
             return "-";
           }
+
           try {
             return relativeTime(new Date(repository.last_updated), this.hass.locale);
           } catch (e) {
@@ -383,6 +408,7 @@ export class HacsDashboard extends LitElement {
           }
         },
       },
+
       installed_version: {
         ...defaultKeyData,
         title: localizeFunc("column.installed_version"),
@@ -392,6 +418,7 @@ export class HacsDashboard extends LitElement {
         template: (repository: RepositoryBase) =>
           repository.installed ? repository.installed_version : "-",
       },
+
       available_version: {
         ...defaultKeyData,
         title: localizeFunc("column.available_version"),
@@ -401,6 +428,7 @@ export class HacsDashboard extends LitElement {
         template: (repository: RepositoryBase) =>
           repository.installed ? repository.available_version : "-",
       },
+
       translated_status: {
         ...defaultKeyData,
         title: localizeFunc("column.status"),
@@ -409,6 +437,7 @@ export class HacsDashboard extends LitElement {
         hidden: false,
         defaultHidden: true,
       },
+
       translated_category: {
         ...defaultKeyData,
         title: localizeFunc("column.type"),
@@ -416,12 +445,14 @@ export class HacsDashboard extends LitElement {
         groupable: true,
         hidden: false,
       },
+
       description: defaultKeyData,
       authors: defaultKeyData,
       domain: defaultKeyData,
       full_name: defaultKeyData,
       id: defaultKeyData,
       topics: defaultKeyData,
+
       actions: {
         title: "",
         label: localizeFunc("column.actions"),
@@ -449,6 +480,7 @@ export class HacsDashboard extends LitElement {
       this._repositoryOverflowMenu.close();
       return;
     }
+
     this._repositoryOverflowMenu.anchorElement = ev.target;
     this._overflowMenuRepository = ev.target.repository;
     this._repositoryOverflowMenu.show();
@@ -459,6 +491,7 @@ export class HacsDashboard extends LitElement {
       this._overflowMenu.close();
       return;
     }
+
     this._overflowMenu.anchorElement = ev.target;
     this._overflowMenu.show();
   };
