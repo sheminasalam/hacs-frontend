@@ -12,13 +12,13 @@ import { createCloseHeading } from "../../../homeassistant-frontend/src/componen
 import "../../../homeassistant-frontend/src/components/ha-svg-icon";
 import { mainWindow } from "../../../homeassistant-frontend/src/common/dom/get_main_window";
 import type { HomeAssistant } from "../../../homeassistant-frontend/src/types";
+import type { HacsList } from "../../data/lists";
 import {
   createList,
   deleteList,
   getLists,
   renameList,
   setRepositoryLists,
-  type HacsList,
 } from "../../data/websocket";
 import type { RepositoryBase } from "../../data/repository";
 import {
@@ -76,7 +76,7 @@ export class HacsListsDialog extends LitElement {
 
     showHacsFormDialog(this, {
       hacs: this._dialogParams.hacs,
-      title: "Create list",
+      title: this._dialogParams.hacs.localize("dialog_lists.create"),
       schema: [
         {
           name: "name",
@@ -104,7 +104,7 @@ export class HacsListsDialog extends LitElement {
 
     showHacsFormDialog(this, {
       hacs: this._dialogParams.hacs,
-      title: "Rename list",
+      title: this._dialogParams.hacs.localize("dialog_lists.rename"),
       schema: [
         {
           name: "name",
@@ -128,15 +128,15 @@ export class HacsListsDialog extends LitElement {
   }
 
   private async _deleteList(list: HacsList): Promise<void> {
-    if (list.builtin) {
+    if (list.builtin || !this._dialogParams) {
       return;
     }
 
     await showConfirmationDialog(this, {
-      title: "Delete list",
-      text: `Delete "${list.name}"? The repositories will remain in HACS.`,
-      confirmText: "Delete",
-      dismissText: "Cancel",
+      title: this._dialogParams.hacs.localize("dialog_lists.delete"),
+      text: this._dialogParams.hacs.localize("dialog_lists.delete_confirm", { name: list.name }),
+      confirmText: this._dialogParams.hacs.localize("dialog_lists.delete"),
+      dismissText: this._dialogParams.hacs.localize("common.cancel"),
       confirm: async () => {
         this._waiting = true;
         try {
@@ -208,8 +208,8 @@ export class HacsListsDialog extends LitElement {
         <div class="layout">
           <div class="lists-column">
             <div class="column-header">
-              <strong>Lists</strong>
-              <mwc-button @click=${this._createList}>+ Create</mwc-button>
+              <strong>${this._dialogParams.hacs.localize("dialog_lists.title")}</strong>
+              <mwc-button @click=${this._createList}>+ ${this._dialogParams.hacs.localize("dialog_lists.create")}</mwc-button>
             </div>
 
             <div class="lists">
@@ -229,7 +229,7 @@ export class HacsListsDialog extends LitElement {
                       : html`
                           <div class="list-actions">
                             <mwc-icon-button
-                              title="Rename"
+                              .title=${this._dialogParams!.hacs.localize("dialog_lists.rename")}
                               @click=${(event: Event) => {
                                 event.stopPropagation();
                                 this._renameList(list);
@@ -238,7 +238,7 @@ export class HacsListsDialog extends LitElement {
                               <ha-svg-icon .path=${mdiPencil}></ha-svg-icon>
                             </mwc-icon-button>
                             <mwc-icon-button
-                              title="Delete"
+                              .title=${this._dialogParams!.hacs.localize("dialog_lists.delete")}
                               @click=${(event: Event) => {
                                 event.stopPropagation();
                                 this._deleteList(list);
@@ -259,7 +259,7 @@ export class HacsListsDialog extends LitElement {
               ? html`
                   <div class="column-header">
                     <strong>${selectedList.name}</strong>
-                    <span>${selectedList.repositories.length} saved</span>
+                    <span>${this._dialogParams.hacs.localize("dialog_lists.saved", { count: selectedList.repositories.length })}</span>
                   </div>
 
                   <div class="repositories">
@@ -280,15 +280,15 @@ export class HacsListsDialog extends LitElement {
                                   ${savedRepository.full_name}
                                   ${repository
                                     ? repository.installed
-                                      ? " · Installed"
-                                      : " · Not installed"
-                                    : " · No longer available in HACS"}
+                                      ? ` · ${this._dialogParams!.hacs.localize("dialog_lists.installed")}`
+                                      : ` · ${this._dialogParams!.hacs.localize("dialog_lists.not_installed")}`
+                                    : ` · ${this._dialogParams!.hacs.localize("dialog_lists.unavailable")}`}
                                 </div>
                               </div>
 
                               <div class="repository-actions">
                                 <mwc-icon-button
-                                  title="Open"
+                                  .title=${this._dialogParams!.hacs.localize("dialog_lists.open")}
                                   @click=${() =>
                                     this._openRepository(
                                       repository,
@@ -305,7 +305,7 @@ export class HacsListsDialog extends LitElement {
                                           this._removeRepository(String(repository.id))}
                                         .disabled=${this._waiting}
                                       >
-                                        Remove
+                                        ${this._dialogParams!.hacs.localize("common.remove")}
                                       </mwc-button>
                                     `
                                   : nothing}
@@ -313,10 +313,10 @@ export class HacsListsDialog extends LitElement {
                             </div>
                           `;
                         })
-                      : html`<div class="empty">This list is empty.</div>`}
+                      : html`<div class="empty">${this._dialogParams.hacs.localize("dialog_lists.empty")}</div>`}
                   </div>
                 `
-              : html`<div class="empty">No lists available.</div>`}
+              : html`<div class="empty">${this._dialogParams.hacs.localize("dialog_lists.no_lists")}</div>`}
           </div>
         </div>
 
@@ -329,7 +329,7 @@ export class HacsListsDialog extends LitElement {
           @click=${this.closeDialog}
           .disabled=${this._waiting}
         >
-          Close
+          ${this._dialogParams.hacs.localize("dialog_lists.close")}
         </mwc-button>
       </ha-dialog>
     `;
