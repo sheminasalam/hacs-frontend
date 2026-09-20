@@ -6,11 +6,11 @@ import { fireEvent } from "../../../homeassistant-frontend/src/common/dom/fire_e
 import "../../../homeassistant-frontend/src/components/ha-dialog";
 import { createCloseHeading } from "../../../homeassistant-frontend/src/components/ha-dialog";
 import type { HomeAssistant } from "../../../homeassistant-frontend/src/types";
+import type { HacsList } from "../../data/lists";
 import {
   createList,
   getLists,
   setRepositoryLists,
-  type HacsList,
 } from "../../data/websocket";
 import { showHacsFormDialog, type HacsRepositoryListsDialogParams } from "./show-hacs-dialog";
 
@@ -79,7 +79,7 @@ export class HacsRepositoryListsDialog extends LitElement {
 
     showHacsFormDialog(this, {
       hacs: this._dialogParams.hacs,
-      title: "Create list",
+      title: this._dialogParams.hacs.localize("dialog_lists.create"),
       schema: [
         {
           name: "name",
@@ -136,12 +136,12 @@ export class HacsRepositoryListsDialog extends LitElement {
         open
         scrimClickAction
         escapeKeyAction
-        .heading=${createCloseHeading(this.hass, "Add to lists")}
+        .heading=${createCloseHeading(this.hass, this._dialogParams.hacs.localize("dialog_lists.add_to_lists"))}
         @closed=${this.closeDialog}
       >
         <div class="content">
           <div class="actions">
-            <mwc-button @click=${this._createList}>+ Create list</mwc-button>
+            <mwc-button @click=${this._createList}>+ ${this._dialogParams.hacs.localize("dialog_lists.create")}</mwc-button>
           </div>
 
           <div class="list">
@@ -169,7 +169,7 @@ export class HacsRepositoryListsDialog extends LitElement {
           @click=${this.closeDialog}
           .disabled=${this._waiting}
         >
-          Cancel
+          ${this._dialogParams.hacs.localize("common.cancel")}
         </mwc-button>
 
         <mwc-button
@@ -177,7 +177,7 @@ export class HacsRepositoryListsDialog extends LitElement {
           @click=${this._save}
           .disabled=${this._waiting}
         >
-          Save
+          ${this._dialogParams.hacs.localize("common.save")}
         </mwc-button>
       </ha-dialog>
     `;
