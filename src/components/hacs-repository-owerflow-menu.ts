@@ -49,7 +49,7 @@ export const repositoryMenuItems = memoizeOne(
       : []),
     {
       path: mdiFormatListBulleted,
-      label: "Add to lists...",
+      label: localize("repository_card.add_to_lists"),
       action: () =>
         showHacsRepositoryListsDialog(element, {
           hacs: element.hacs,
