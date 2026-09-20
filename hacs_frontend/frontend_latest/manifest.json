@@ -1,0 +1,4 @@
+{
+  "entrypoint.js": "/hacsfiles/frontend/frontend_latest/entrypoint.js",
+  "extra.js": "/hacsfiles/frontend/frontend_latest/extra.js"
+}

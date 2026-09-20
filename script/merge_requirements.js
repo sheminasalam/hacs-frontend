@@ -61,6 +61,11 @@ const replacePatches = (deps) =>
     ]),
   );
 
+const omitKeys = (obj, keys) =>
+  Object.fromEntries(Object.entries(obj).filter(([key]) => !keys.includes(key)));
+
+const dependenciesIgnore = hacs.dependenciesIgnore ?? [];
+
 fs.writeFileSync(
   "./package.json",
   JSON.stringify(
@@ -70,10 +75,13 @@ fs.writeFileSync(
         ...replacePatches(core.resolutions),
         ...hacs.resolutionsOverride,
       },
-      dependencies: {
-        ...replacePatches(core.dependencies),
-        ...hacs.dependenciesOverride,
-      },
+      dependencies: omitKeys(
+        {
+          ...replacePatches(core.dependencies),
+          ...hacs.dependenciesOverride,
+        },
+        dependenciesIgnore,
+      ),
       devDependencies: {
         ...replacePatches(core.devDependencies),
         ...hacs.devDependenciesOverride,
