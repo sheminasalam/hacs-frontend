@@ -7,7 +7,12 @@ import { ProvideHassLitMixin } from "../homeassistant-frontend/src/mixins/provid
 import type { HomeAssistant } from "../homeassistant-frontend/src/types";
 import { computeLocalize } from "../homeassistant-frontend/src/common/translations/localize";
 import { getTranslation } from "../homeassistant-frontend/src/util/common-translation";
-import { fetchHacsInfo, getRepositories, websocketSubscription } from "./data/websocket";
+import {
+  fetchHacsInfo,
+  getLists,
+  getRepositories,
+  websocketSubscription,
+} from "./data/websocket";
 import { HacsDispatchEvent } from "./data/common";
 
 export class HacsElement extends ProvideHassLitMixin(LitElement) {
@@ -27,6 +32,7 @@ export class HacsElement extends ProvideHassLitMixin(LitElement) {
     if (!this.hasUpdated) {
       this._initHacs();
     }
+
     if (changedProperties.has("hass")) {
       const oldHass = changedProperties.get("hass") as HomeAssistant | undefined;
       if (oldHass?.language !== this.hass.language) {
@@ -43,40 +49,47 @@ export class HacsElement extends ProvideHassLitMixin(LitElement) {
     websocketSubscription(
       this.hass,
       () => this._updateProperties("configuration"),
-      HacsDispatchEvent.CONFIG
+      HacsDispatchEvent.CONFIG,
     );
 
     websocketSubscription(
       this.hass,
       () => this._updateProperties("status"),
-      HacsDispatchEvent.STATUS
+      HacsDispatchEvent.STATUS,
     );
 
     websocketSubscription(
       this.hass,
       () => this._updateProperties("status"),
-      HacsDispatchEvent.STAGE
+      HacsDispatchEvent.STAGE,
     );
 
     websocketSubscription(
       this.hass,
       () => this._updateProperties("repositories"),
-      HacsDispatchEvent.REPOSITORY
+      HacsDispatchEvent.REPOSITORY,
+    );
+
+    websocketSubscription(
+      this.hass,
+      () => this._updateProperties("lists"),
+      HacsDispatchEvent.LISTS,
     );
 
     this.hass.connection.subscribeEvents(
       async () => this._updateProperties("lovelace"),
-      "lovelace_updated"
+      "lovelace_updated",
     );
 
     this._updateHacs({
       log: new HacsLogger(),
+      lists: [],
     });
 
     this._updateProperties();
 
     this.addEventListener("update-hacs", (e) =>
-      this._updateHacs((e as any).detail as Partial<Hacs>)
+      this._updateHacs((e as any).detail as Partial<Hacs>),
     );
   }
 
@@ -94,14 +107,17 @@ export class HacsElement extends ProvideHassLitMixin(LitElement) {
     const _fetch: any = {};
 
     if (prop === "all") {
-      [_fetch.repositories, _fetch.info] = await Promise.all([
+      [_fetch.repositories, _fetch.info, _fetch.lists] = await Promise.all([
         getRepositories(this.hass),
         fetchHacsInfo(this.hass),
+        getLists(this.hass),
       ]);
     } else if (prop === "info") {
       _fetch.info = await fetchHacsInfo(this.hass);
     } else if (prop === "repositories") {
       _fetch.repositories = await getRepositories(this.hass);
+    } else if (prop === "lists") {
+      _fetch.lists = await getLists(this.hass);
     }
 
     Object.keys(_fetch).forEach((update) => {
@@ -109,6 +125,7 @@ export class HacsElement extends ProvideHassLitMixin(LitElement) {
         _updates[update] = _fetch[update];
       }
     });
+
     if (_updates) {
       this._updateHacs(_updates);
       this.requestUpdate();
