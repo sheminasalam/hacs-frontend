@@ -1,19 +1,8 @@
 import type { HomeAssistant } from "../../homeassistant-frontend/src/types";
 import type { Hacs, HacsInfo } from "./hacs";
 import type { HacsDispatchEvent } from "./common";
+import type { HacsList } from "./lists";
 import type { RepositoryBase } from "./repository";
-
-export interface HacsListRepository {
-  id: string;
-  full_name: string;
-}
-
-export interface HacsList {
-  id: string;
-  name: string;
-  builtin: boolean;
-  repositories: HacsListRepository[];
-}
 
 export const fetchHacsInfo = async (hass: HomeAssistant) =>
   hass.connection.sendMessagePromise<HacsInfo>({
@@ -69,7 +58,7 @@ export const repositoryUninstall = async (hass: HomeAssistant, repository: strin
 export const repositoryAdd = async (hass: HomeAssistant, repository: string, category: string) =>
   hass.connection.sendMessagePromise<null | Record<string, string>>({
     type: "hacs/repositories/add",
-    repository: repository,
+    repository,
     category,
   });
 
