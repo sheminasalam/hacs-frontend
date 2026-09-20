@@ -16,6 +16,7 @@ export interface LocationChangedEvent {
 export enum HacsDispatchEvent {
   CONFIG = "hacs_dispatch_config",
   ERROR = "hacs_dispatch_error",
+  LISTS = "hacs_dispatch_lists",
   RELOAD = "hacs_dispatch_reload",
   REPOSITORY = "hacs_dispatch_repository",
   STAGE = "hacs_dispatch_stage",

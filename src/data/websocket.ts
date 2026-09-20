@@ -1,6 +1,7 @@
 import type { HomeAssistant } from "../../homeassistant-frontend/src/types";
 import type { Hacs, HacsInfo } from "./hacs";
 import type { HacsDispatchEvent } from "./common";
+import type { HacsList } from "./lists";
 import type { RepositoryBase } from "./repository";
 
 export const fetchHacsInfo = async (hass: HomeAssistant) =>
@@ -13,6 +14,41 @@ export const getRepositories = async (hass: HomeAssistant) =>
     type: "hacs/repositories/list",
   });
 
+export const getLists = async (hass: HomeAssistant) =>
+  hass.connection.sendMessagePromise<HacsList[]>({
+    type: "hacs/lists/list",
+  });
+
+export const createList = async (hass: HomeAssistant, name: string) =>
+  hass.connection.sendMessagePromise<HacsList[]>({
+    type: "hacs/lists/create",
+    name,
+  });
+
+export const renameList = async (hass: HomeAssistant, listId: string, name: string) =>
+  hass.connection.sendMessagePromise<HacsList[]>({
+    type: "hacs/lists/rename",
+    list_id: listId,
+    name,
+  });
+
+export const deleteList = async (hass: HomeAssistant, listId: string) =>
+  hass.connection.sendMessagePromise<HacsList[]>({
+    type: "hacs/lists/delete",
+    list_id: listId,
+  });
+
+export const setRepositoryLists = async (
+  hass: HomeAssistant,
+  repository: string,
+  lists: string[],
+) =>
+  hass.connection.sendMessagePromise<HacsList[]>({
+    type: "hacs/lists/set_repository",
+    repository,
+    lists,
+  });
+
 export const repositoryUninstall = async (hass: HomeAssistant, repository: string) =>
   hass.connection.sendMessagePromise<void>({
     type: "hacs/repository/remove",
@@ -22,7 +58,7 @@ export const repositoryUninstall = async (hass: HomeAssistant, repository: strin
 export const repositoryAdd = async (hass: HomeAssistant, repository: string, category: string) =>
   hass.connection.sendMessagePromise<null | Record<string, string>>({
     type: "hacs/repositories/add",
-    repository: repository,
+    repository,
     category,
   });
 

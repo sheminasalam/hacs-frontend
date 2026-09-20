@@ -4,6 +4,7 @@ import {
   mdiArrowDownCircle,
   mdiClose,
   mdiDownload,
+  mdiFormatListBulleted,
   mdiGithub,
   mdiInformation,
   mdiLanguageJavascript,
@@ -23,7 +24,11 @@ import {
 } from "../data/websocket";
 import type { HacsDashboard } from "../dashboards/hacs-dashboard";
 import type { HacsRepositoryDashboard } from "../dashboards/hacs-repository-dashboard";
-import { showHacsDownloadDialog, showHacsFormDialog } from "./dialogs/show-hacs-dialog";
+import {
+  showHacsDownloadDialog,
+  showHacsFormDialog,
+  showHacsRepositoryListsDialog,
+} from "./dialogs/show-hacs-dialog";
 import { LocalizeFunc } from "../../homeassistant-frontend/src/common/translations/localize";
 import { HacsLocalizeKeys } from "../data/localize";
 
@@ -42,6 +47,15 @@ export const repositoryMenuItems = memoizeOne(
           },
         ]
       : []),
+    {
+      path: mdiFormatListBulleted,
+      label: localize("repository_card.add_to_lists"),
+      action: () =>
+        showHacsRepositoryListsDialog(element, {
+          hacs: element.hacs,
+          repositoryId: String(repository.id),
+        }),
+    },
     {
       path: mdiGithub,
       label: localize("common.repository"),

@@ -109,7 +109,8 @@
     "pending_update": "Pending update",
     "redownload": "Redownload",
     "report": "Request for removal",
-    "update_information": "Update information"
+    "update_information": "Update information",
+    "add_to_lists": "Add to lists..."
   },
   "repository_status": {
     "pending-restart": "Pending restart",
@@ -123,7 +124,8 @@
     "custom_repositories": "Custom repositories",
     "open_issue": "Open issue",
     "dismiss": "Dismiss new repositories",
-    "documentation": "Documentation"
+    "documentation": "Documentation",
+    "lists": "Lists"
   },
   "dialog": {
     "reload": {
@@ -170,5 +172,21 @@
         }
       }
     }
+  },
+  "dialog_lists": {
+    "title": "HACS Lists",
+    "create": "Create list",
+    "rename": "Rename list",
+    "delete": "Delete list",
+    "delete_confirm": "Delete \"{name}\"? The repositories will remain in HACS.",
+    "saved": "{count} saved",
+    "installed": "Installed",
+    "not_installed": "Not installed",
+    "unavailable": "No longer available in HACS",
+    "open": "Open",
+    "add_to_lists": "Add to lists",
+    "empty": "This list is empty.",
+    "no_lists": "No lists available.",
+    "close": "Close"
   }
 }
