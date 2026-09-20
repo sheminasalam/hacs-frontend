@@ -202,7 +202,10 @@ export class HacsListsDialog extends LitElement {
         open
         scrimClickAction
         escapeKeyAction
-        .heading=${createCloseHeading(this.hass, "HACS Lists")}
+        .heading=${createCloseHeading(
+          this.hass,
+          this._dialogParams.hacs.localize("dialog_lists.title"),
+        )}
         @closed=${this.closeDialog}
       >
         <div class="layout">
